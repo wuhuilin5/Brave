@@ -1,5 +1,7 @@
 #include "MainScene.h"
 #include "Player.h"
+#include "FSM.h"
+#include "ThingStatus.h"
 
 USING_NS_CC;
 
@@ -39,11 +41,11 @@ bool MainScene::init()
 
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("image/role.plist", "image/role.pvr.ccz");
 
-	_player = Player::create(Player::PlayerType::PLAYER);
+	_player = Player::create(ThingType::PLAYER);
 	_player->setPosition(origin.x + _player->getContentSize().width/2, origin.y + visibleSize.height/2);
 	this->addChild(_player);
 
-	_enemy1 = Player::create(Player::PlayerType::ENEMY1);
+	_enemy1 = Player::create(ThingType::ENEMY1);
 	_enemy1->setPosition(origin.x + visibleSize.width - _enemy1->getContentSize().width/2, origin.y + visibleSize.height/2);
 	this->addChild(_enemy1);
 
@@ -53,6 +55,8 @@ bool MainScene::init()
 	_listener_touch = EventListenerTouchOneByOne::create();
 	_listener_touch->onTouchBegan = CC_CALLBACK_2(MainScene::onTouchBegan, this );
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(_listener_touch, this);
+
+	auto fsm = FSM::create(ThingStatus::IDLE,[](){cocos2d::log("Enter idle");});
 
     return true;
 }

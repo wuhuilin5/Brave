@@ -5,31 +5,36 @@
 
 USING_NS_CC;
 
+class FSM;
+
+enum ThingType
+{
+	PLAYER,
+	ENEMY1,
+	ENEMY2
+};
+
 class Player : public Sprite
 {
 public:
-	enum PlayerType
-	{
-		PLAYER,
-		ENEMY1,
-		ENEMY2
-	};
-
+	
 	Player();
 
-	static Player* create(PlayerType type);
+	static Player* create(ThingType type);
 
-	bool initWithPlayerType(PlayerType type);
+	bool initWithThingType(ThingType type);
 	
 	void playAnimationForever(int index);
 
 	void walkTo(Vec2 dest);
 
+	void initFSM();
+
 private:
 	void addAnimations();
 
 private:
-	PlayerType _type;
+	ThingType _type;
 	std::string _name;
 
 	int _animationNum;
@@ -38,6 +43,9 @@ private:
 
 	Sequence* _seq;
 	float _speed;
+
+	FSM* _fsm;
+
 };
 
 #endif

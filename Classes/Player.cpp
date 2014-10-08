@@ -1,4 +1,6 @@
 #include "Player.h"
+#include "FSM.h"
+#include "ThingStatus.h"
 
 Player::Player()
 : _seq(nullptr)
@@ -7,7 +9,7 @@ Player::Player()
 
 }
 
-bool Player::initWithPlayerType(PlayerType type)
+bool Player::initWithThingType(ThingType type)
 {
 	std::string spName = "";
 	_type = type;
@@ -16,19 +18,19 @@ bool Player::initWithPlayerType(PlayerType type)
 
 	switch( type )
 	{
-		case PlayerType::PLAYER:
+		case ThingType::PLAYER:
 			spName = "player1-1-1.png";
 			_name = "player1";
 			_animationNum = 5;
 			_animationFrameNum.assign(animationFrameNum,animationFrameNum + 5);
 			break;
-		case PlayerType::ENEMY1:
+		case ThingType::ENEMY1:
 			spName = "enemy1-1-1.png";
 			_name = "enemy1";
 			_animationNum = 4;
 			_animationFrameNum.assign(animationFrameNum2,animationFrameNum2 + 5);
 			break;
-		case PlayerType::ENEMY2:
+		case ThingType::ENEMY2:
 			spName = "enemy2-1-1.png";
 			_name = "enemy2";
 			_animationNum = 4;
@@ -46,10 +48,10 @@ bool Player::initWithPlayerType(PlayerType type)
 	return true;
 }
 
-Player* Player::create(PlayerType type )
+Player* Player::create(ThingType type )
 {
 	Player* player = new Player();
-	if(player && player->initWithPlayerType(type))
+	if(player && player->initWithThingType(type))
 	{
 		player->autorelease();
 		return player;
@@ -125,4 +127,10 @@ void Player::walkTo(Vec2 dest)
 
 	this->runAction(_seq);
 	this->playAnimationForever(0);
+}
+
+void Player::initFSM()
+{
+	_fsm = FSM::create(ThingStatus::IDLE);
+
 }

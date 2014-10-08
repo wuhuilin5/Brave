@@ -12,9 +12,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-		WCHAR utf16Path[512] = {0};
-    GetCurrentDirectoryW(sizeof(utf16Path)-1, utf16Path);
-
     // create the application instance
     AppDelegate app;
     return Application::getInstance()->run();
