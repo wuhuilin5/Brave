@@ -138,9 +138,12 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClCompile Include="..\Classes\FSM.cpp" />
     <ClCompile Include="..\Classes\MainScene.cpp" />
     <ClCompile Include="..\Classes\Player.cpp" />
+    <ClCompile Include="..\Classes\Progress.cpp" />
     <ClCompile Include="..\Classes\Thing.cpp" />
+    <ClCompile Include="..\Classes\ThingHead.cpp" />
     <ClCompile Include="..\Classes\ThingManager.cpp" />
     <ClCompile Include="..\Classes\ThingStatus.cpp" />
+    <ClCompile Include="..\Classes\VisibleRect.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -150,9 +153,12 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
     <ClInclude Include="..\Classes\FSM.h" />
     <ClInclude Include="..\Classes\MainScene.h" />
     <ClInclude Include="..\Classes\Player.h" />
+    <ClInclude Include="..\Classes\Progress.h" />
     <ClInclude Include="..\Classes\Thing.h" />
+    <ClInclude Include="..\Classes\ThingHead.h" />
     <ClInclude Include="..\Classes\ThingManager.h" />
     <ClInclude Include="..\Classes\ThingStatus.h" />
+    <ClInclude Include="..\Classes\VisibleRect.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>

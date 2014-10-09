@@ -6,6 +6,7 @@
 USING_NS_CC;
 
 class Thing;
+class Progress;
 
 class MainScene : public cocos2d::Layer
 {
@@ -35,6 +36,8 @@ private:
 
 	Thing* _player;
 	Thing* _enemy1;
+
+	Progress* _progress;
 };
 
 #endif // __MainScene_SCENE_H__

@@ -7,6 +7,7 @@
 USING_NS_CC;
 
 class FSM;
+class ThingHead;
 
 enum ThingType
 {
@@ -34,6 +35,9 @@ public:
 
 	const char* getAnimationNameByType(AnimationType type);
 
+	const float getSpeed(){ return _speed; }
+	void setSpeed( const float speed ) { _speed = speed; }
+
 	virtual void onExit() override;
 
 protected:
@@ -47,6 +51,8 @@ protected:
 	
 	virtual bool init() override;
 	virtual void initAnimationInfos();
+	virtual void initHead(){}
+
 	void initFSM();
 
 protected:
@@ -54,6 +60,7 @@ protected:
 	std::string _name;
 	float _speed;
 	FSM* _fsm;
+	ThingHead* _head;
 
 	std::set<AnimationType> _animations;
 	std::vector<int> _animationFrameNum;

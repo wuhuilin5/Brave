@@ -3,6 +3,8 @@
 #include "FSM.h"
 #include "ThingStatus.h"
 #include "ThingManager.h"
+#include "Progress.h"
+#include "VisibleRect.h"
 
 USING_NS_CC;
 
@@ -33,21 +35,19 @@ bool MainScene::init()
 
 	this->setGLProgram(GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_COLOR));
 
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
 	Sprite *background = Sprite::create("image/background.png");
-	background->setPosition(origin + visibleSize/2);
+	background->setPosition(VisibleRect::center());
 	this->addChild(background);
 
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("image/role.plist", "image/role.pvr.ccz");
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("image/ui.plist", "image/ui.pvr.ccz");
 
 	_player = ThingManager::getInstance()->createThing(ThingType::PLAYER);
-	_player->setPosition(origin.x + _player->getContentSize().width/2, origin.y + visibleSize.height/2);
+	_player->setPosition(VisibleRect::left().x + _player->getContentSize().width/2, VisibleRect::center().y);
 	this->addChild(_player);
 
 	_enemy1 = ThingManager::getInstance()->createThing(ThingType::CREATURE);
-	_enemy1->setPosition(origin.x + visibleSize.width - _enemy1->getContentSize().width/2, origin.y + visibleSize.height/2);
+	_enemy1->setPosition(VisibleRect::right().x - _enemy1->getContentSize().width/2, VisibleRect::center().y);
 	this->addChild(_enemy1);
 
 	_player->playAnimationForever(AnimationType::ATTACK);
@@ -56,6 +56,10 @@ bool MainScene::init()
 	_listener_touch = EventListenerTouchOneByOne::create();
 	_listener_touch->onTouchBegan = CC_CALLBACK_2(MainScene::onTouchBegan, this );
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(_listener_touch, this);
+
+	_progress = Progress::create("player-progress-bg.png", "player-progress-fill.png");
+	_progress->setPosition(VisibleRect::left().x + _progress->getContentSize().width/2, VisibleRect::top().y - _progress->getContentSize().height/2);
+	this->addChild(_progress);
 
     return true;
 }

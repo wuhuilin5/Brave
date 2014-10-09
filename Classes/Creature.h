@@ -11,6 +11,7 @@ public:
 
 protected:
 	virtual bool init() override;
+	virtual void initHead() override;
 
 private:
 
