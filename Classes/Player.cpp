@@ -2,50 +2,11 @@
 #include "FSM.h"
 #include "ThingStatus.h"
 
+std::unordered_map<AnimationType, std::string> Player::_animationNames;
+
 Player::Player()
-: _seq(nullptr)
-, _speed(100.0f)
+: _speed(100.0f)
 {
-
-}
-
-bool Player::initWithThingType(ThingType type)
-{
-	std::string spName = "";
-	_type = type;
-	int animationFrameNum[5] = {4, 4, 4, 2, 4};
-	int animationFrameNum2[5] = {3, 3, 3, 2, 0};
-
-	switch( type )
-	{
-		case ThingType::PLAYER:
-			spName = "player1-1-1.png";
-			_name = "player1";
-			_animationNum = 5;
-			_animationFrameNum.assign(animationFrameNum,animationFrameNum + 5);
-			break;
-		case ThingType::ENEMY1:
-			spName = "enemy1-1-1.png";
-			_name = "enemy1";
-			_animationNum = 4;
-			_animationFrameNum.assign(animationFrameNum2,animationFrameNum2 + 5);
-			break;
-		case ThingType::ENEMY2:
-			spName = "enemy2-1-1.png";
-			_name = "enemy2";
-			_animationNum = 4;
-			_animationFrameNum.assign(animationFrameNum2,animationFrameNum2 + 5);
-			break;
-	}
-
-	this->initWithSpriteFrameName(spName);
-
-	std::string animationNames[5]= {"walk", "attack", "dead", "hit", "skill"};
-	_animationNames.assign(animationNames, animationNames + 5 );
-
-	this->addAnimations();
-
-	return true;
 }
 
 Player* Player::create(ThingType type )
@@ -64,14 +25,68 @@ Player* Player::create(ThingType type )
 	}
 }
 
+bool Player::initWithThingType(ThingType type)
+{
+	_type = type;
+	int animationFrameNum[5] = {4, 4, 4, 2, 4};
+	int animationFrameNum2[5] = {3, 3, 3, 2, 0};
+	
+	switch( type )
+	{
+		case ThingType::PLAYER:
+			_name = "player1";
+			break;
+		case ThingType::ENEMY1:
+			_name = "enemy1";
+			break;
+		case ThingType::ENEMY2:
+			_name = "enemy2";
+			break;
+	}
+
+	std::string spName = _name + "-1-1.png";
+
+	this->initAnimationInfos(_type == ThingType::PLAYER ? animationFrameNum : animationFrameNum2);
+	this->initWithSpriteFrameName(spName);
+	this->initFSM();
+
+	this->addAnimations();
+
+	return true;
+}
+
+void Player::initAnimationInfos(int framenum[])
+{
+	if(_animationNames.size() == 0)
+	{
+		_animationNames[AnimationType::WALK] = "walk";
+		_animationNames[AnimationType::DIE] = "dead";
+		_animationNames[AnimationType::ATTACK] = "attack";
+		_animationNames[AnimationType::ATTACKED] = "hit";
+		_animationNames[AnimationType::SKILL] = "skill";
+	}
+	_animationFrameNum.assign(framenum, framenum + _animationNames.size());
+
+	_animations.insert(AnimationType::WALK);
+	_animations.insert(AnimationType::ATTACK);
+	_animations.insert(AnimationType::DIE);
+	_animations.insert(AnimationType::ATTACKED);
+	
+	if(_type == ThingType::PLAYER)
+	{
+		_animations.insert(AnimationType::SKILL);
+	}
+}
+
 void Player::addAnimations()
 {
-	const std::string animationName = String::createWithFormat("%s-%s", _name.c_str(),_animationNames[0])->getCString();
+	const std::string animationName = this->getAnimationNameByType(AnimationType::IDLE);
 	auto animation = AnimationCache::getInstance()->getAnimation(animationName);
 	if(animation)
 		return;
 
-	for(int i=0; i < _animationNum; i++ )
+	int i = 0;
+	for( auto iter = _animations.begin(); iter != _animations.end(); iter++, i++)
 	{
 		auto animation = Animation::create();
 		animation->setDelayPerUnit(0.2f);
@@ -83,26 +98,69 @@ void Player::addAnimations()
 		}
 
 		//put the animation into cache
-		const std::string animName = String::createWithFormat("%s-%s", _name.c_str(), _animationNames[i])->getCString();
+		const std::string animName = this->getAnimationNameByType(*iter);
 		AnimationCache::getInstance()->addAnimation(animation, animName);
 	}
 }
 
-void Player::playAnimationForever(int index)
+void Player::playAnimationForever(AnimationType type)
 {
-	if(index < 0 || index >= _animationNum)	
+	auto animate = this->getAnimateByType(type);
+	if(animate != nullptr)
 	{
-		log("illegal animation index!");
-		return;
+		this->runAction(RepeatForever::create(animate));
+	}
+}
+
+Animate* Player::getAnimateByType(AnimationType type)
+{
+	if(_animationNames.find(type) == _animationNames.end())
+	{
+		log("illegal animation type!");
+		return nullptr;
 	}
 
-	auto animName = String::createWithFormat("%s-%s", _name.c_str(), _animationNames[index])->getCString();
+	auto animName = this->getAnimationNameByType(type);
 	auto animation = AnimationCache::getInstance()->getAnimation(animName);
 	auto animate = Animate::create(animation);
-	this->runAction(RepeatForever::create(animate));
+	animate->setTag(static_cast<int>(type));
+
+	return animate;
+}
+
+const char* Player::getAnimationNameByType(AnimationType type)
+{
+	return String::createWithFormat("%s-%s", _name.c_str(), _animationNames[type].c_str())->getCString();
 }
 
 void Player::walkTo(Vec2 dest)
+{
+	_fsm->setOnEnter(ThingStatus::WALK, CC_CALLBACK_0(Player::onWalk, this, dest));
+	_fsm->doAnimation(AnimationType::WALK);
+}
+
+void Player::initFSM()
+{
+	_fsm = FSM::create(ThingStatus::IDLE);
+	_fsm->retain();
+
+	_fsm->setOnEnter(ThingStatus::IDLE, CC_CALLBACK_0(Player::onIdle, this));
+	_fsm->setOnEnter(ThingStatus::ATTACK, CC_CALLBACK_0(Player::onAttack, this));
+	_fsm->setOnEnter(ThingStatus::ATTACKED, CC_CALLBACK_0(Player::onAttacked, this));
+	_fsm->setOnEnter(ThingStatus::DEAD, CC_CALLBACK_0(Player::onDie, this));
+}
+
+void Player::onIdle()
+{
+	cocos2d::log("onIdle: Enter Idle");
+	this->stopAllActions();
+
+	auto sfname = String::createWithFormat("%s-1-1.png", _name.c_str())->getCString();
+	auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(sfname);
+	this->setSpriteFrame(spriteFrame);
+}
+
+void Player::onWalk(Vec2 dest)
 {
 	this->stopAllActions();
 	/*if(_seq)
@@ -118,19 +176,66 @@ void Player::walkTo(Vec2 dest)
 	//lambda function
 	auto func = [&]()  //void()
 	{
-		this->stopAllActions();
-		_seq = nullptr;
+		this->_fsm->doAnimation(AnimationType::STOP);
 	};
 
 	auto callback = CallFunc::create(func);
-	_seq = Sequence::create(move, callback, nullptr);
+	auto seq = Sequence::create(move, callback, nullptr);
 
-	this->runAction(_seq);
-	this->playAnimationForever(0);
+	this->runAction(seq);
+	this->playAnimationForever(AnimationType::WALK);
 }
 
-void Player::initFSM()
+void Player::onAttack()
 {
-	_fsm = FSM::create(ThingStatus::IDLE);
+	cocos2d::log("onAttack: Enter attack");
+	auto animate = this->getAnimateByType(AnimationType::ATTACK);
+	auto func = [&]()
+	{
+		this->_fsm->doAnimation(AnimationType::STOP);
+		
+	};
 
+	auto callback = CCCallFunc::create(func);
+	auto seq = Sequence::create(animate, callback, nullptr);
+	this->runAction(seq);
+}
+
+void Player::onAttacked()
+{
+	cocos2d::log("onAttacked: Enter attacked");
+	auto animate = this->getAnimateByType(AnimationType::ATTACKED);
+	auto func = [&]()
+	{
+		this->_fsm->doAnimation(AnimationType::STOP);
+	};
+
+	auto wait = DelayTime::create(0.6f);
+	auto callback = CCCallFunc::create(func);
+	auto seq = Sequence::create(wait, animate, callback, nullptr);
+	this->runAction(seq);
+}
+
+void Player::onDie()
+{
+	cocos2d::log("onDie: Enter die");
+	auto animate = this->getAnimateByType(AnimationType::DIE);
+	auto func = [&]()
+	{
+		if(_type != ThingType::PLAYER)
+		{
+			NotificationCenter::getInstance()->postNotification("emenyDead", this);
+			this->removeAllChildrenWithCleanup(true);
+		}
+	};
+
+	auto blink = Blink::create(3, 5);
+	auto callback = CCCallFunc::create(func);
+	auto seq = Sequence::create(animate, blink, callback, nullptr);
+	this->runAction(seq);
+}
+
+ThingType Player::getType()
+{
+	return _type;
 }

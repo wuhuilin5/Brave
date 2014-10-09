@@ -15,10 +15,10 @@ public:
 	FSM(std::string state, std::function<void()> onEnter = nullptr);
 
 	//add state into FSM
-	FSM* addState(std::string state, std::function<void()> onEnter = nullptr);
+	void addState(std::string state, std::function<void()> onEnter = nullptr);
 
 	//add Event into FSM
-	FSM* addAnimation(AnimationType type, std::string from, std::string to);
+	void addAnimation(AnimationType type, std::string from, std::string to);
 
 	//Check if the state if already in FSM
 	bool isContainState(std::string stateName);

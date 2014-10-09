@@ -1,10 +1,15 @@
 #include "FSM.h"
 #include "ThingStatus.h"
 
+//std::set<std::string> FSM::_states;
+//std::unordered_map<std::string, std::function<void()>> FSM::_onEnters;
+//std::unordered_map<AnimationType, std::unordered_map<std::string, std::string>> FSM::_animations;
+
  FSM:: FSM(std::string state, std::function<void()> onEnter)
 {
 	_currentState = state;
 	_previousState = state;
+
 	this->addState(state, onEnter);
 }
 
@@ -25,50 +30,55 @@ FSM* FSM::create(std::string state, std::function<void()> onEnter)
 
 bool FSM::init()
 {
-	this->addState(ThingStatus::WALK,[](){cocos2d::log("Enter walk");});
-	this->addState(ThingStatus::ATTACK,[](){cocos2d::log("Enter attack");});
-	this->addState(ThingStatus::DEAD,[](){cocos2d::log("Enter dead");});
-	this->addState(ThingStatus::ATTACKED,[](){cocos2d::log("Enter ATTACKED");});
+	addState(ThingStatus::WALK,[](){cocos2d::log("Enter walk");});
+	addState(ThingStatus::ATTACK,[](){cocos2d::log("Enter attack");});
+	addState(ThingStatus::DEAD,[](){cocos2d::log("Enter dead");});
+	addState(ThingStatus::ATTACKED,[](){cocos2d::log("Enter ATTACKED");});
 
-	this->addAnimation(AnimationType::WALK,ThingStatus::IDLE,ThingStatus::WALK)
-	->addAnimation(AnimationType::WALK,ThingStatus::ATTACK,ThingStatus::WALK)
-	->addAnimation(AnimationType::ATTACK,ThingStatus::IDLE,ThingStatus::ATTACK)
-	->addAnimation(AnimationType::ATTACK,ThingStatus::WALK, ThingStatus::ATTACK)
-	->addAnimation(AnimationType::DIE,ThingStatus::IDLE,ThingStatus::DEAD)
-	->addAnimation(AnimationType::DIE,ThingStatus::WALK,ThingStatus::DEAD)
-	->addAnimation(AnimationType::DIE,ThingStatus::ATTACK,ThingStatus::DEAD)
-	->addAnimation(AnimationType::STOP,ThingStatus::WALK,ThingStatus::IDLE)
-	->addAnimation(AnimationType::STOP,ThingStatus::ATTACK,ThingStatus::IDLE)
-	->addAnimation(AnimationType::WALK,ThingStatus::WALK,ThingStatus::WALK)
-	->addAnimation(AnimationType::ATTACKED,ThingStatus::IDLE,ThingStatus::ATTACKED)
-	->addAnimation(AnimationType::ATTACKED,ThingStatus::WALK,ThingStatus::ATTACKED)
-	->addAnimation(AnimationType::ATTACKED,ThingStatus::ATTACK,ThingStatus::ATTACKED) //can ATTACK be stoped by beHit?
-	->addAnimation(AnimationType::DIE,ThingStatus::ATTACKED,ThingStatus::DEAD)
-	->addAnimation(AnimationType::STOP,ThingStatus::ATTACKED,ThingStatus::IDLE)
-	->addAnimation(AnimationType::STOP,ThingStatus::IDLE,ThingStatus::IDLE);
+	if(_animations.size() == 0)
+	{
+		addAnimation(AnimationType::WALK,ThingStatus::IDLE,ThingStatus::WALK);
+		addAnimation(AnimationType::WALK,ThingStatus::ATTACK,ThingStatus::WALK);
+		addAnimation(AnimationType::WALK,ThingStatus::WALK,ThingStatus::WALK);
 
-	 this->doAnimation(AnimationType::WALK);     
-	 this->doAnimation(AnimationType::ATTACK);    
-	 this->doAnimation(AnimationType::NONE);     
-	 this->doAnimation(AnimationType::STOP);     
-	 this->doAnimation(AnimationType::DIE);     
-	 this->doAnimation(AnimationType::WALK);
+		addAnimation(AnimationType::ATTACK,ThingStatus::IDLE,ThingStatus::ATTACK);
+		addAnimation(AnimationType::ATTACK,ThingStatus::WALK, ThingStatus::ATTACK);
+		
+		addAnimation(AnimationType::ATTACKED,ThingStatus::IDLE,ThingStatus::ATTACKED);
+		addAnimation(AnimationType::ATTACKED,ThingStatus::WALK,ThingStatus::ATTACKED);
+		addAnimation(AnimationType::ATTACKED,ThingStatus::ATTACK,ThingStatus::ATTACKED); //can ATTACK be stoped by beHit?
+
+		addAnimation(AnimationType::DIE,ThingStatus::IDLE,ThingStatus::DEAD);
+		addAnimation(AnimationType::DIE,ThingStatus::WALK,ThingStatus::DEAD);
+		addAnimation(AnimationType::DIE,ThingStatus::ATTACK,ThingStatus::DEAD);
+		addAnimation(AnimationType::DIE,ThingStatus::ATTACKED,ThingStatus::DEAD);
+
+		addAnimation(AnimationType::STOP,ThingStatus::WALK,ThingStatus::IDLE);
+		addAnimation(AnimationType::STOP,ThingStatus::ATTACK,ThingStatus::IDLE);
+		addAnimation(AnimationType::STOP,ThingStatus::ATTACKED,ThingStatus::IDLE);
+		addAnimation(AnimationType::STOP,ThingStatus::IDLE,ThingStatus::IDLE);
+	}
+
+	 //this->doAnimation(AnimationType::WALK);     
+	 //this->doAnimation(AnimationType::ATTACK);    
+	 //this->doAnimation(AnimationType::NONE);     
+	 //this->doAnimation(AnimationType::STOP);     
+	 //this->doAnimation(AnimationType::DIE);     
+	 //this->doAnimation(AnimationType::WALK);
 
 	return true;
 }
 
-FSM* FSM::addState(std::string state, std::function<void()> onEnter)
+void FSM::addState(std::string state, std::function<void()> onEnter)
 {
 	if(state == "")
 	{
 		cocos2d::log("FSM::addState: state cann't be empty string!");
-		return nullptr;
+		return;
 	}
 	_states.insert(state);
 	//_onEnters.insert(std::pair<std::string, std::function<void()>>(state, onEnter));
 	_onEnters[state] = onEnter;
-
-	return this;
 }
 
 bool FSM::isContainState(std::string stateName)
@@ -102,29 +112,28 @@ void FSM::changeToState(std::string state)
 	}
 }
 
-FSM* FSM::addAnimation(AnimationType type, std::string from, std::string to)
+void FSM::addAnimation(AnimationType type, std::string from, std::string to)
 {
-	/*if(eventName == "")
+	if(type == AnimationType::NONE)
 	{
-		cocos2d::log("FSM::addAnimation: event cann't be empty string!");
-		return nullptr;
-	}*/
+		cocos2d::log("FSM::addAnimation: event cann't be none animation type!");
+		return;
+	}
 
 	if(!isContainState(from))
 	{
 		cocos2d::log("FSM::addAnimation: from state %s does not exit!", from.c_str());
-		return nullptr;
+		return;
 	}
 
 	if(!isContainState(to))
 	{
 		cocos2d::log("FSM::addAnimation: to state %s does not exit!", to.c_str());
-		return nullptr;
+		return;
 	}
 
 	std::unordered_map<std::string, std::string>& onEvent = _animations[type];
 	onEvent[from] = to;
-	return this;
 }
 
 bool FSM::candoAnimation(AnimationType type)

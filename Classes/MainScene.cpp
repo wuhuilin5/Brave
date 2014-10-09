@@ -49,14 +49,12 @@ bool MainScene::init()
 	_enemy1->setPosition(origin.x + visibleSize.width - _enemy1->getContentSize().width/2, origin.y + visibleSize.height/2);
 	this->addChild(_enemy1);
 
-	_player->playAnimationForever(1);
-	_enemy1->playAnimationForever(1);
+	_player->playAnimationForever(AnimationType::ATTACK);
+	_enemy1->playAnimationForever(AnimationType::ATTACK);
 
 	_listener_touch = EventListenerTouchOneByOne::create();
 	_listener_touch->onTouchBegan = CC_CALLBACK_2(MainScene::onTouchBegan, this );
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(_listener_touch, this);
-
-	auto fsm = FSM::create(ThingStatus::IDLE,[](){cocos2d::log("Enter idle");});
 
     return true;
 }
