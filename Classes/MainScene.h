@@ -5,7 +5,7 @@
 
 USING_NS_CC;
 
-class Player;
+class Thing;
 
 class MainScene : public cocos2d::Layer
 {
@@ -33,8 +33,8 @@ protected:
 private:
 	EventListenerTouchOneByOne* _listener_touch;
 
-	Player* _player;
-	Player* _enemy1;
+	Thing* _player;
+	Thing* _enemy1;
 };
 
 #endif // __MainScene_SCENE_H__
