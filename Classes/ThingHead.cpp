@@ -6,10 +6,10 @@ ThingHead::ThingHead()
 {
 }
 
-ThingHead* ThingHead::create(const char* background)
+ThingHead* ThingHead::create()
 {
 	ThingHead* head = new ThingHead();
-	if(head && head->initWithSpriteFrameName(background))
+	if(head && head->init())
 	{
 		head->autorelease();
 		return head;
@@ -18,9 +18,21 @@ ThingHead* ThingHead::create(const char* background)
 	return nullptr;
 }
 
-void ThingHead::initHpBar(const char* background, const char* fillname)
+ThingHead* ThingHead::create(const char* spriteFrameName)
 {
-	_hpBar = Progress::create(background, fillname);
+	ThingHead* head = new ThingHead();
+	if(head && head->initWithSpriteFrameName(spriteFrameName))
+	{
+		head->autorelease();
+		return head;
+	}
+	CC_SAFE_DELETE(head);
+	return nullptr;
+}
+
+void ThingHead::initHpBar(const char* backgroundSpriteFrameName, const char* fillSpriteFrameName)
+{
+	_hpBar = Progress::create(backgroundSpriteFrameName, fillSpriteFrameName);
 	this->addChild(_hpBar);
 }
 

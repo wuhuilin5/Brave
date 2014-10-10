@@ -11,8 +11,9 @@ USING_NS_CC;
 Scene* MainScene::createScene()
 {
     // 'scene' is an autorelease object
-    auto scene = Scene::create();
-    
+	//init with physics
+	auto scene = Scene::create();
+
     // 'layer' is an autorelease object
     auto layer = MainScene::create();
 
@@ -43,7 +44,9 @@ bool MainScene::init()
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("image/ui.plist", "image/ui.pvr.ccz");
 
 	_player = ThingManager::getInstance()->createThing(ThingType::PLAYER);
-	_player->setPosition(VisibleRect::left().x + _player->getContentSize().width/2, VisibleRect::center().y);
+	//_player->setPosition(VisibleRect::left().x + _player->getContentSize().width/2, VisibleRect::center().y);
+	_player->setPosition(VisibleRect::leftBottom());
+	_player->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
 	this->addChild(_player);
 
 	_enemy1 = ThingManager::getInstance()->createThing(ThingType::CREATURE);

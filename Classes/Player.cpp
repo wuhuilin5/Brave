@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "ThingHead.h"
 
 Player::Player()
 :Thing(ThingType::PLAYER)
@@ -23,11 +24,24 @@ bool Player::init()
 	int animationFrameNum[5] = {4, 4, 4, 2, 4};
 	_animationFrameNum.assign(animationFrameNum, animationFrameNum + 5 );
 
-	return Thing::init();
+	if(!Thing::init())
+		return false;
+
+	this->initHead();
+	return true;
 }
 
 void Player::initAnimationInfos()
 {
 	Thing::initAnimationInfos();
 	_animations.insert(AnimationType::SKILL);
+}
+
+void Player::initHead()
+{
+	_head = ThingHead::create();
+	this->addChild(_head);
+
+	_head->initHpBar("small-enemy-progress-bg.png", "small-enemy-progress-fill.png");
+	_head->setPosition(this->getContentSize().width/2, this->getContentSize().height);
 }

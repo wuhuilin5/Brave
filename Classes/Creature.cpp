@@ -24,15 +24,18 @@ bool Creature::init()
 	int animationFrameNum[5] = {3, 3, 3, 2, 0};
 	_animationFrameNum.assign(animationFrameNum, animationFrameNum + 5 );
 
-	//this->initHead();
+	if(!Thing::init())
+		return false;
 
-	return Thing::init();
+	this->initHead();
+	return true;
 }
 
 void Creature::initHead()
 {
-	_head = ThingHead::create("small-enemy-progress-bg.png");
+	_head = ThingHead::create();
 	this->addChild(_head);
 
 	_head->initHpBar("small-enemy-progress-bg.png", "small-enemy-progress-fill.png");
+	_head->setPosition(this->getContentSize().width/2, this->getContentSize().height);
 }

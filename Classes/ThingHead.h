@@ -11,12 +11,13 @@ class ThingHead : public Sprite
 public:
 	ThingHead();
 
-	static ThingHead* create(const char* background);
+	static ThingHead* create();
+	static ThingHead* create(const char* spriteFrameName);
 	
 	//virtual bool init() override;
 
 	void initName(const std::string name);
-	void initHpBar(const char* backgournd, const char* fillname);
+	void initHpBar(const char* backgroundSpriteFrameName, const char* fillSpriteFrameName);
 
 private:
 	Progress* _hpBar;

@@ -12,6 +12,7 @@ public:
 protected:
 	virtual bool init() override;
 	virtual void initAnimationInfos() override;
+	virtual void initHead() override;
 
 private:
 
