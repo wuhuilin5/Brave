@@ -24,22 +24,23 @@ ThingManager* ThingManager::getInstance()
 
 Thing* ThingManager::createThing(ThingType type)
 {
+	Thing* thing = nullptr;
 	switch (type)
 	{
 	case PLAYER:
-		return Player::create();
+		thing = Player::create();
 		break;
 	case ENEMY:
-		return Creature::create();
+		thing = Creature::create();
 		break;
 	case NPC:
 		break;
 	case CREATURE:
-		return Creature::create();
+		thing = Creature::create();
 		break;
 	default:
 		break;
 	}
 
-	return nullptr;
+	return thing;
 }
